@@ -1,11 +1,10 @@
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 import { coffees } from '@/data/coffees';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Image } from 'react-native';
 
 export default function DetailScreen() {
-
   const { id } = useLocalSearchParams();
   const coffee = coffees.find((coffee) => coffee.id === Number(id));
 

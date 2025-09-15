@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { Coffee } from '../data/coffees'
+import { Coffee } from '@/data/coffees'
+import { create } from 'zustand'
 
 type Order = {
   coffee: Coffee,
@@ -18,19 +18,17 @@ export const useOrderStore = create<OrderState>()((set) => ({
     const coffeeIndex = state.orders.findIndex((order) => order.coffee.id === coffee.id);
     const coffeeHasAlreadyBeenOrdered = coffeeIndex !== -1;
     if (coffeeHasAlreadyBeenOrdered) {
-      if (coffeeHasAlreadyBeenOrdered) {
-        return {
-          orders: state.orders.map((order, index) => {
-            if (index === coffeeIndex) {
-              return {
-                ...order,
-                amount: order.amount + 1,
-              }
+      return {
+        orders: state.orders.map((order, index) => {
+          if (index === coffeeIndex) {
+            return {
+              ...order,
+              amount: order.amount + 1,
             }
-            return order;
-          })
-        };
-      }
+          }
+          return order;
+        })
+      };
     }
     // else: return orders array with an added order
     return {

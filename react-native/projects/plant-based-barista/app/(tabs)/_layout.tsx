@@ -1,19 +1,17 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
 
-import { HapticTab } from '@/components/HapticTab';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { useOrderStore } from '@/store/useOrderStore';
+import { HapticTab } from '@/components/haptic-tab';
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useOrderStore } from '@/hooks/use-order-store';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   const orders = useOrderStore(state => state.orders);
-  const coffeeCount = orders.reduce((count, order) => count + order.amount, 0);
+  const coffeeCount = orders.reduce((acc, order) => acc + order.amount, 0);
 
   return (
     <Tabs
@@ -21,14 +19,6 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            // position: 'absolute',
-          },
-          default: {},
-        }),
       }}>
       <Tabs.Screen
         name="(index)"
@@ -40,7 +30,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="order"
         options={{
-          title: 'Orders',
+          title: 'Order',
           tabBarBadge: coffeeCount > 0 ? coffeeCount : undefined,
           tabBarIcon: ({ color, focused }) => <Ionicons size={28} name={focused ? 'cart' : 'cart-outline'} color={color} />,
         }}

@@ -78,8 +78,8 @@ Make sure to read through the documentation to get a grasp of how this file stru
 The explore.tsx and index.tsx files contain a lot of demo code, let's get rid of that and keep them a bare minimum:
 
 ```tsx
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 
 export default function HomeScreen() {
   return (
@@ -209,26 +209,23 @@ export { coffees }
 **import this coffees array and Coffee type in your `app/(tabs)/index.tsx` file and use it to display the list of coffees in the FlashList component.**
 
 ```ts
-import { Coffee, coffees } from '../../data/coffees';
+import { Coffee, coffees } from '@/data/coffees';
 ```
 
 ```diff
-export default function TabOneScreen() {
+const MyList = () => {
   return (
-    <View style={styles.container}>
-      <FlashList
--        data={DATA}
--        renderItem={({ item }) => <ThemedText>{item.title}</ThemedText>}
-+        data={coffees}
-+        renderItem={({ item }) => <ThemedText>{item.name}</ThemedText>}
-        estimatedItemSize={200}
-      />
-    </View>
+    <FlashList
+-     data={DATA}
+-     renderItem={({ item }) => <ThemedText>{item.title}</ThemedText>}
++     data={coffees}
++     renderItem={({ item }) => <ThemedText>{item.name}</ThemedText>}
+    />
   );
-}
+};
 ```
 
-You'll need to do a full app refresh to see the changes, because of the **aggressive caching** of Flashlist. As this is a bit annoying to do on iOS, you **might want to switch to the web** version of your app to do faster refreshes.
+You might need to do a full app refresh to see the changes, because of the **aggressive caching** of Flashlist. As this is a bit annoying to do on iOS, you **might want to switch to the web** version of your app to do faster refreshes.
 
 ### Display the image, name and price
 
@@ -248,14 +245,13 @@ Adjust the renderItem method, so it shows the Image and the label next to each o
   data={coffees}
 -  renderItem={({ item }) => <ThemedText>{item.name}</ThemedText>}
 +  renderItem={({ item }) => <ThemedView>
-+    <Image source={item.image} style={{ width: 40, height: 40 }} />
++    <Image source={item.image} style={{ width: 50, height: 50 }} />
 +    <ThemedText>{item.name}</ThemedText>
 +  </ThemedView>}
-  estimatedItemSize={200}
 />
 ```
 
-Once you've got that image working, adjust the renderItem method so it shows the price as well. Use extra `<ThemedView>` components to style the layout of the image, name and price.
+Once you've got that image working, adjust the renderItem method so it shows the price as well. Use extra `<ThemedView>` components (which are basically react-native flexbox divs) to style the layout of the image, name and price.
 
 ![overview screen](images/overview-screen.png)
 
@@ -273,7 +269,6 @@ Whenever we tab on one of the coffees, we want to navigate to a detail page. In 
   ```
 
 4. Move the `(tabs)/index.tsx` file into the `(tabs)/(index)` folder and update the necessary imports.
-5. Stop and start the server in your command line to make sure the routing changes are picked up.
 
 ```
 ├── app
@@ -292,7 +287,7 @@ You'll notice you're getting a familiar warning message:
 
 > No route named "index" exists in nested children
 
-Make sure to update the name of the screen in the `app/(tabs)/_layout.tsx` file.
+Make sure to update the name of the `index` screen to `(index)` in the `app/(tabs)/_layout.tsx` file.
 
 ### Link to the detail screen
 
@@ -301,8 +296,8 @@ Within the (index) group, create a new file `[id].tsx`. This will be our detail 
 Create a basic view with some text in it:
 
 ```tsx
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 
 export default function DetailScreen() {
   return (
@@ -346,12 +341,11 @@ Test the app (you might need to do a full restart of your dev server). Tapping a
 The filename of our detail view has a special name: `[id].tsx`. This means that the id of the coffee will be available as a parameter in the `useLocalSearchParams` hook of expo-router.
 
 ```tsx
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 import { useLocalSearchParams } from 'expo-router';
 
 export default function DetailScreen() {
-
   const { id } = useLocalSearchParams();
 
   return (
@@ -371,9 +365,9 @@ const { id } = useLocalSearchParams();
 const coffee = coffees.find((coffee) => coffee.id === id);
 
 return (
-  <View>
-    <Text>Detail of {coffee?.name}</Text>
-  </View>
+  <ThemedView>
+    <ThemedText>Detail of {coffee?.name}</ThemedText>
+  </ThemedView>
 )
 ```
 
@@ -439,10 +433,11 @@ On our coffees list screen, we want to add coffees to our order (which is furthe
 npm install zustand
 ```
 
-Create a new file `store/useOrderStore.ts` (again: the store folder should be in the root of your project, not the app subfolder) and add the following code, defining our Order type:
+Create a new file `hooks/use-order-store.ts` (again: the hooks folder should be in the root of your project, not the app subfolder) and add the following code, defining our Order type:
 
 ```ts
-import { Coffee } from '../data/coffees'
+import { Coffee } from '@/data/coffees'
+import { create } from 'zustand'
 
 type Order = {
   coffee: Coffee,
@@ -462,7 +457,7 @@ interface OrderState {
 
 This interface is just a description of what the store will do, but doesn't contain any logic. It's a contract where our implementation will adhere to.
 
-Import zustand at the top of the file and create a store using the `create` method:
+Create a store using zustand's `create` method:
 
 ```ts
 export const useOrderStore = create<OrderState>()((set) => ({
@@ -547,7 +542,7 @@ Inside of the list, we want to add a button to add a coffee to the cart.
 Import the useOrderStore hook in your `app/(tabs)/(index)/index.tsx` file:
 
 ```ts
-import { useOrderStore } from '../../../store/useOrderStore';
+import { useOrderStore } from '@/hooks/use-order-store';
 ```
 
 Inside the component's render function get the `orderCoffee` method from the store's state:
@@ -594,7 +589,9 @@ Add a tabBarBadge to the tab options:
 />
 ```
 
-You should see a badge with a number on the tab icon now. This does not take into account the amount of items in the order, adjust the code calculating the coffeeCount so it takes the amount of items into account.
+You should see a badge with a number on the tab icon now. This does not take into account the amount of items in the order.
+
+**Adjust the code calculating the coffeeCount so it takes the amount of items into account.**
 
 ![order count badge](images/order-count-badge.png)
 
@@ -621,8 +618,6 @@ The Order tab will also consist of two screens in a stack: the order overview an
 ```
 
 Use the useOrderStore hook to retrieve the orders from the store, and display them in a FlashList component. Add the necessary calculations to calculate the line item totals and total price, and display those as well. Make sure there is a Button (`import { Button } from "react-native";` ) at the bottom of that screen to confirm the order.
-
-> Beware: In the default expo project, the tab bar is positioned absolutedly on iOS (see app/(tabs)/_layout.tsx). In order to have the bottom of your screen align to the top of the tab bar, you will need to remove the absolute positioning.
 
 ![order screen](images/order-screen.png)
 
